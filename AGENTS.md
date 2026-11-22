@@ -28,3 +28,14 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+## Application architecture
+
+Keep the Novels Forever experience in TanStack file routes and domain modules under `src/lib`; this keeps shareable pages distinct and server-only operations behind explicit boundaries.
+
+Keep owner privileges only in `user_roles` checked by `has_role`, and link migrated accounts through the server-only `legacy_user_imports` table after verified email; client input never grants access.
+
+Keep the bundled `src/data/catalog.json` as the base library and layer owner edits from the `catalog_*` tables over it; the site still works if the backend is unreachable.
+
+Vercel builds are switched on by the `VERCEL` env var in `vite.config.ts` (nitro `vercel` preset, offline worker written to `.vercel/output/static`, public backend values filled in); Lovable hosting builds must stay untouched by that branch.
+
+Looping animations on the Nadia Nawaz page move only transform/opacity and pause off-screen via `usePlayWhenVisible`; reduced-motion calms them instead of stopping them, because the owner wants them visible on every phone.
