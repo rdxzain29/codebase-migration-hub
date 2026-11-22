@@ -8,6 +8,13 @@
       "when": 1795323320593,
       "tag": "0000_novels_forever_core",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795324033705,
+      "tag": "0001_reels_and_reader_accounts",
+      "breakpoints": true
     }
   ]
 }

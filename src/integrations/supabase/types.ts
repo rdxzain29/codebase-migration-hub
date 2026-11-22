@@ -248,6 +248,36 @@ export type Database = {
         }
         Relationships: []
       }
+      reels: {
+        Row: {
+          created_at: string
+          file_path: string | null
+          hidden: boolean
+          id: string
+          kind: string
+          title: string
+          video_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_path?: string | null
+          hidden?: boolean
+          id?: string
+          kind: string
+          title?: string
+          video_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_path?: string | null
+          hidden?: boolean
+          id?: string
+          kind?: string
+          title?: string
+          video_id?: string | null
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comment: string
@@ -258,6 +288,7 @@ export type Database = {
           rating: number
           replied_at: string | null
           reply: string | null
+          user_id: string | null
         }
         Insert: {
           comment?: string
@@ -268,6 +299,7 @@ export type Database = {
           rating: number
           replied_at?: string | null
           reply?: string | null
+          user_id?: string | null
         }
         Update: {
           comment?: string
@@ -278,6 +310,7 @@ export type Database = {
           rating?: number
           replied_at?: string | null
           reply?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -352,7 +385,9 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_allowed_signup_email: { Args: { _email: string }; Returns: boolean }
       is_registered_pdf: { Args: { _path: string }; Returns: boolean }
+      is_registered_reel: { Args: { _path: string }; Returns: boolean }
       list_novel_pdfs: {
         Args: never
         Returns: {
