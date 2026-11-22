@@ -27,8 +27,8 @@
       "capability": "authentication identities",
       "source": "owner email/password; public sign-up off; no user export",
       "outcome": "migrate with verified-email first login and new password",
-      "status": "pending",
-      "next_action": "email sign-in on, public sign-up off; owner email rdxshahzain@gmail.com on owner list; owner creates account via Users → Add user, then signs in at /auth; user export pending"
+      "status": "verified",
+      "next_action": "owner account created with owner's chosen password and gets owner role; reader sign-in with Google, Microsoft or Gmail/Outlook email; user export of other old users still pending"
     },
     {
       "capability": "authorization and owner roles",

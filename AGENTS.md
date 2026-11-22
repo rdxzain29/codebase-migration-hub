@@ -39,3 +39,7 @@ Keep the bundled `src/data/catalog.json` as the base library and layer owner edi
 Vercel builds are switched on by the `VERCEL` env var in `vite.config.ts` (nitro `vercel` preset, offline worker written to `.vercel/output/static`, public backend values filled in); Lovable hosting builds must stay untouched by that branch.
 
 Looping animations on the Nadia Nawaz page move only transform/opacity and pause off-screen via `usePlayWhenVisible`; reduced-motion calms them instead of stopping them, because the owner wants them visible on every phone.
+
+Reader accounts use Lovable Cloud auth (Google, Microsoft, email+password); the allowed email domains live in `src/lib/login.ts` and are mirrored by the `enforce_signup_email_domain` trigger, so change both together.
+
+The Reels feed merges owner-added `reels` rows (first) with the channel's YouTube Shorts read page-by-page from the public Shorts tab in `src/lib/reels.functions.ts`; no YouTube API key is needed, and the RSS Shorts playlist is the fallback.

@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { BookOpen, FileText, House, MessageCircle, PenLine } from "lucide-react";
+import { BookOpen, Clapperboard, FileText, House, MessageCircle, PenLine } from "lucide-react";
 
 const TABS = [
   { to: "/", label: "Home", icon: House },
   { to: "/novels", label: "Novels", icon: BookOpen },
+  { to: "/reels", label: "Reels", icon: Clapperboard },
   { to: "/authors", label: "Writers", icon: PenLine },
   { to: "/pdfs", label: "PDFs", icon: FileText },
   { to: "/contact", label: "Support", icon: MessageCircle },
@@ -16,7 +17,7 @@ export function MobileTabBar() {
       aria-label="Quick navigation"
       className="tabbar pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-border lg:hidden"
     >
-      <ul className="mx-auto grid h-16 max-w-xl grid-cols-5">
+      <ul className="mx-auto grid h-16 max-w-xl grid-cols-6">
         {TABS.map(({ to, label, icon: Icon }) => (
           <li key={to}>
             <Link

@@ -1,7 +1,7 @@
 import { createFileRoute, redirect, useNavigate, useRouter } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { BookOpen, FileText, Inbox, LayoutGrid, Star, Youtube } from "lucide-react";
+import { BookOpen, Clapperboard, FileText, Inbox, LayoutGrid, Star, Youtube } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatCard } from "@/components/admin/fields";
@@ -10,13 +10,14 @@ import { FeedbackPanel } from "@/components/admin/FeedbackPanel";
 import { NovelsPanel } from "@/components/admin/NovelsPanel";
 import { PdfPanel } from "@/components/admin/PdfPanel";
 import { ReviewsPanel } from "@/components/admin/ReviewsPanel";
+import { ReelsPanel } from "@/components/admin/ReelsPanel";
 import { UploadsPanel } from "@/components/admin/UploadsPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { allReviewsQuery, feedbackQuery, isAdminRole } from "@/lib/admin";
 import { refreshCatalog } from "@/lib/admin-catalog";
 import { categories, totalNovels, totalVideos } from "@/lib/catalog";
 
-const TABS = ["uploads", "novels", "categories", "reviews", "messages", "pdfs"] as const;
+const TABS = ["uploads", "novels", "reels", "categories", "reviews", "messages", "pdfs"] as const;
 type Tab = (typeof TABS)[number];
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -34,7 +35,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
       { title: "Owner Area — Novels Forever" },
-      { name: "description", content: "Manage novels, episodes, categories, reviews and PDFs on Novels Forever." },
+      { name: "description", content: "Manage novels, episodes, reels, categories, reviews and PDFs on Novels Forever." },
       { property: "og:title", content: "Owner Area — Novels Forever" },
       { property: "og:description", content: "Owner tools for Novels Forever." },
       { property: "og:type", content: "website" },
@@ -94,6 +95,7 @@ function AdminPage() {
         <TabsList className="scrollbar-none h-auto w-full justify-start gap-1 overflow-x-auto bg-card p-1">
           <TabsTrigger value="uploads" className={trigger}><Youtube className="h-4 w-4" /> New uploads</TabsTrigger>
           <TabsTrigger value="novels" className={trigger}><BookOpen className="h-4 w-4" /> Novels</TabsTrigger>
+          <TabsTrigger value="reels" className={trigger}><Clapperboard className="h-4 w-4" /> Reels</TabsTrigger>
           <TabsTrigger value="categories" className={trigger}><LayoutGrid className="h-4 w-4" /> Categories</TabsTrigger>
           <TabsTrigger value="reviews" className={trigger}><Star className="h-4 w-4" /> Reviews{waiting ? ` (${waiting})` : ""}</TabsTrigger>
           <TabsTrigger value="messages" className={trigger}><Inbox className="h-4 w-4" /> Messages</TabsTrigger>
@@ -102,6 +104,7 @@ function AdminPage() {
         <div className="mt-6">
           <TabsContent value="uploads"><UploadsPanel onChanged={onChanged} /></TabsContent>
           <TabsContent value="novels"><NovelsPanel onChanged={onChanged} version={version} /></TabsContent>
+          <TabsContent value="reels"><ReelsPanel /></TabsContent>
           <TabsContent value="categories"><CategoriesPanel key={version} onChanged={onChanged} /></TabsContent>
           <TabsContent value="reviews"><ReviewsPanel /></TabsContent>
           <TabsContent value="messages"><FeedbackPanel /></TabsContent>

@@ -54,6 +54,11 @@
   --color-google: var(--google);
   --color-google-foreground: var(--google-foreground);
   --color-google-border: var(--google-border);
+  --color-microsoft: var(--microsoft);
+  --color-microsoft-foreground: var(--microsoft-foreground);
+  --color-microsoft-border: var(--microsoft-border);
+  --color-reel: var(--reel);
+  --color-reel-foreground: var(--reel-foreground);
   --color-instagram: var(--instagram);
   --color-facebook: var(--facebook);
   --color-threads: var(--threads);
@@ -112,6 +117,13 @@
   --google: oklch(0.19 0.003 286);
   --google-foreground: oklch(0.92 0.003 286);
   --google-border: oklch(0.65 0.006 160);
+  /* Microsoft sign-in button, dark theme (#2F2F2F / white, per Microsoft brand guidance). */
+  --microsoft: oklch(0.297 0 0);
+  --microsoft-foreground: oklch(1 0 0);
+  --microsoft-border: oklch(0.64 0 0);
+  /* Reels player stage: near-black so videos read like a phone screen. */
+  --reel: oklch(0.08 0.01 222);
+  --reel-foreground: oklch(0.98 0.005 85);
   --instagram: oklch(0.65 0.23 5);
   --facebook: oklch(0.6 0.19 258);
   --threads: oklch(0.95 0.01 85);
@@ -512,4 +524,24 @@
   .nn-aurora { animation-duration: 28s; }
   .nn-orbit, .nn-orbit-upright { animation-duration: 60s; }
   .nn-page .shelf-track { animation-duration: 70s !important; }
+}
+
+/* Reels: vertical, one-video-per-screen feed. */
+@utility reel-feed {
+  height: 100dvh;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  overscroll-behavior: contain;
+  overflow-anchor: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+@utility reel-slide {
+  height: 100dvh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+@utility reel-shade {
+  background: linear-gradient(to top, oklch(0 0 0 / 0.75), oklch(0 0 0 / 0) 45%),
+    linear-gradient(to bottom, oklch(0 0 0 / 0.5), oklch(0 0 0 / 0) 20%);
 }

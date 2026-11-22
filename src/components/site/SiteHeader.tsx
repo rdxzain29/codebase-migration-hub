@@ -1,12 +1,21 @@
 import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Menu, UserRound, X } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowRight, LayoutDashboard, LogOut, Menu, UserRound, X } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
+import { useAccount } from "@/lib/account";
 import { isAdminQuery } from "@/lib/admin";
-import { openLogin, useReaderName } from "@/lib/reader";
 import { cn } from "@/lib/utils";
 
 import { InstallAppButton } from "./InstallAppButton";
@@ -16,6 +25,7 @@ import { OwnerStrip } from "./OwnerStrip";
 const NAV = [
   { to: "/", label: "Home" },
   { to: "/novels", label: "Novels" },
+  { to: "/reels", label: "Reels" },
   { to: "/authors", label: "Authors" },
   { to: "/playlists", label: "Playlists" },
   { to: "/nadia-nawaz", label: "Nadia Nawaz" },
@@ -24,7 +34,8 @@ const NAV = [
 ] as const;
 
 export function SiteHeader() {
-  const name = useReaderName();
+  const account = useAccount();
+  const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const { data: ownerUser } = useQuery({
     queryKey: ["owner-session"],
@@ -58,17 +69,51 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-          <div className="relative">
-            {!name && (
-              <span aria-hidden className="animate-point-x absolute -left-5 top-1/2 -mt-2 text-primary">
-                <ArrowRight className="h-4 w-4" />
-              </span>
-            )}
-            <Button variant={name ? "glass" : "gold"} size="sm" onClick={openLogin}>
-              <UserRound />
-              <span className="max-w-20 truncate sm:max-w-28">{name ?? "Login"}</span>
-            </Button>
-          </div>
+          {account ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="glass" size="sm" aria-label="Your account">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gold text-[10px] font-bold text-primary-foreground">
+                    {account.name.slice(0, 1).toUpperCase()}
+                  </span>
+                  <span className="max-w-20 truncate sm:max-w-28">{account.name}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="font-normal">
+                  <p className="truncate text-sm font-medium">{account.name}</p>
+                  <p className="truncate text-xs text-muted-foreground">{account.email}</p>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {ownerAccess && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin"><LayoutDashboard /> Owner area</Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  onSelect={async () => {
+                    await supabase.auth.signOut();
+                    qc.setQueryData(["owner-session"], null);
+                    qc.removeQueries({ queryKey: ["is-admin"] });
+                    toast("You are signed out.");
+                  }}
+                >
+                  <LogOut /> Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="relative">
+              {account === null && (
+                <span aria-hidden className="animate-point-x absolute -left-5 top-1/2 -mt-2 text-primary">
+                  <ArrowRight className="h-4 w-4" />
+                </span>
+              )}
+              <Button asChild variant="gold" size="sm">
+                <Link to="/login"><UserRound /> Login</Link>
+              </Button>
+            </div>
+          )}
           {ownerUser === null ? (
             <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
               <Link to="/auth" aria-label="Owner sign in">Owner sign in</Link>

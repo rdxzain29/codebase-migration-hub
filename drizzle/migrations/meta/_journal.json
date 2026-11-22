@@ -15,6 +15,20 @@
       "when": 1795324033705,
       "tag": "0001_reels_and_reader_accounts",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795324505517,
+      "tag": "0002_allow_preview_test_accounts",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795324603626,
+      "tag": "0003_fix_reels_visitor_access",
+      "breakpoints": true
     }
   ]
 }

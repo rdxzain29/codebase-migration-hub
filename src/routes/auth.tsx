@@ -131,7 +131,7 @@ function AuthPage() {
         <p className="text-xs uppercase tracking-[0.3em] text-primary/80">Owner area</p>
         <h1 className="mt-2 font-display text-4xl font-semibold">{title}</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Only the site owner can enter this area. Readers only need a name to leave reviews.
+          Only the site owner can enter this area. Readers can sign in on the reader login page.
         </p>
         {checking || busy ? (
           <p className="mt-6 text-sm text-muted-foreground">Checking account…</p>

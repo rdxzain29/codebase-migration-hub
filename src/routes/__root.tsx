@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -155,6 +156,8 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  // The full-screen Reels player keeps floating buttons and popups out of the way.
+  const onReels = useRouterState({ select: (s) => s.location.pathname === "/reels" });
   // Idempotent: installs the server's catalog version before children render.
   applyCatalogOverrides(Route.useLoaderData().catalog);
 
@@ -184,9 +187,9 @@ function RootComponent() {
         <SiteFooter />
       </div>
       <LoginDialog />
-      <YoutubePopup />
+      {!onReels && <YoutubePopup />}
       <MobileTabBar />
-      <AgentLauncher />
+      {!onReels && <AgentLauncher />}
       <Toaster position="top-center" />
     </QueryClientProvider>
   );

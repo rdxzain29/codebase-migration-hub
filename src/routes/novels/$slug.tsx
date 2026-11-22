@@ -224,10 +224,10 @@ function Reviews({ slug }: { slug: string }) {
     <section className="mt-10" aria-label="Reviews">
       <h2 className="font-display text-3xl">Reviews</h2>
       <form onSubmit={submit} className="mt-4 space-y-3 rounded-2xl border border-border bg-card-grad p-6">
-        <p className="text-sm text-muted-foreground">{name ? `Reviewing as ${name}` : "Login with your name to post a review."}</p>
+        <p className="text-sm text-muted-foreground">{name ? `Reviewing as ${name}` : "Sign in with Google, Outlook or email to post a review."}</p>
         <Stars value={stars} onChange={setStars} size="lg" />
         <Textarea value={comment} maxLength={1000} onChange={(e) => setComment(e.target.value)} placeholder="What did you love about this novel?" />
-        <Button type="submit" variant="gold" disabled={busy}>{name ? "Post review" : "Login to review"}</Button>
+        <Button type="submit" variant="gold" disabled={busy}>{name ? "Post review" : "Sign in to review"}</Button>
       </form>
       <ul className="mt-6 space-y-4">
         {(reviews ?? []).map((r) => (

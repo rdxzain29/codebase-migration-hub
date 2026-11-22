@@ -21,6 +21,8 @@ const buttonVariants = cva(
         youtube: "bg-youtube text-youtube-foreground font-semibold shadow-sm hover:bg-youtube/90",
         whatsapp: "bg-whatsapp text-whatsapp-foreground font-semibold shadow-sm hover:bg-whatsapp/90",
         google: "border border-google-border bg-google text-google-foreground font-medium hover:brightness-125",
+        microsoft: "border border-microsoft-border bg-microsoft text-microsoft-foreground font-medium hover:brightness-125",
+        reel: "rounded-full bg-reel/50 text-reel-foreground backdrop-blur-sm hover:bg-reel/70",
       },
       size: {
         default: "h-9 px-4 py-2",

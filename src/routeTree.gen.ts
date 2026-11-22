@@ -13,9 +13,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as NadiaNawazRouteImport } from './routes/nadia-nawaz'
 import { Route as PdfsRouteImport } from './routes/pdfs'
 import { Route as PlaylistsRouteImport } from './routes/playlists'
+import { Route as ReelsRouteImport } from './routes/reels'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
@@ -44,6 +46,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NadiaNawazRoute = NadiaNawazRouteImport.update({
   id: '/nadia-nawaz',
   path: '/nadia-nawaz',
@@ -57,6 +64,11 @@ const PdfsRoute = PdfsRouteImport.update({
 const PlaylistsRoute = PlaylistsRouteImport.update({
   id: '/playlists',
   path: '/playlists',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReelsRoute = ReelsRouteImport.update({
+  id: '/reels',
+  path: '/reels',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -104,9 +116,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/login': typeof LoginRoute
   '/nadia-nawaz': typeof NadiaNawazRoute
   '/pdfs': typeof PdfsRoute
   '/playlists': typeof PlaylistsRoute
+  '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/api/chat': typeof ApiChatRoute
@@ -120,9 +134,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/login': typeof LoginRoute
   '/nadia-nawaz': typeof NadiaNawazRoute
   '/pdfs': typeof PdfsRoute
   '/playlists': typeof PlaylistsRoute
+  '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/api/chat': typeof ApiChatRoute
@@ -138,9 +154,11 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/login': typeof LoginRoute
   '/nadia-nawaz': typeof NadiaNawazRoute
   '/pdfs': typeof PdfsRoute
   '/playlists': typeof PlaylistsRoute
+  '/reels': typeof ReelsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/api/chat': typeof ApiChatRoute
@@ -156,9 +174,11 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/contact'
+    | '/login'
     | '/nadia-nawaz'
     | '/pdfs'
     | '/playlists'
+    | '/reels'
     | '/reset-password'
     | '/admin'
     | '/api/chat'
@@ -172,9 +192,11 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/contact'
+    | '/login'
     | '/nadia-nawaz'
     | '/pdfs'
     | '/playlists'
+    | '/reels'
     | '/reset-password'
     | '/admin'
     | '/api/chat'
@@ -189,9 +211,11 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/contact'
+    | '/login'
     | '/nadia-nawaz'
     | '/pdfs'
     | '/playlists'
+    | '/reels'
     | '/reset-password'
     | '/_authenticated/admin'
     | '/api/chat'
@@ -207,9 +231,11 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
+  LoginRoute: typeof LoginRoute
   NadiaNawazRoute: typeof NadiaNawazRoute
   PdfsRoute: typeof PdfsRoute
   PlaylistsRoute: typeof PlaylistsRoute
+  ReelsRoute: typeof ReelsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiChatRoute: typeof ApiChatRoute
   AuthorsSlugRoute: typeof AuthorsSlugRoute
@@ -249,6 +275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/nadia-nawaz': {
       id: '/nadia-nawaz'
       path: '/nadia-nawaz'
@@ -268,6 +301,13 @@ declare module '@tanstack/react-router' {
       path: '/playlists'
       fullPath: '/playlists'
       preLoaderRoute: typeof PlaylistsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reels': {
+      id: '/reels'
+      path: '/reels'
+      fullPath: '/reels'
+      preLoaderRoute: typeof ReelsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -345,9 +385,11 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
+  LoginRoute: LoginRoute,
   NadiaNawazRoute: NadiaNawazRoute,
   PdfsRoute: PdfsRoute,
   PlaylistsRoute: PlaylistsRoute,
+  ReelsRoute: ReelsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ApiChatRoute: ApiChatRoute,
   AuthorsSlugRoute: AuthorsSlugRoute,

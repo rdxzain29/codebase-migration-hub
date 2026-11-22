@@ -11,9 +11,9 @@ export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
       { title: "Set New Password — Novels Forever" },
-      { name: "description", content: "Choose a new password for your Novels Forever owner account." },
+      { name: "description", content: "Choose a new password for your Novels Forever account." },
       { property: "og:title", content: "Set New Password — Novels Forever" },
-      { property: "og:description", content: "Choose a new owner password." },
+      { property: "og:description", content: "Choose a new password for your account." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -54,18 +54,16 @@ function ResetPasswordPage() {
     try {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
-      const { linked } = await claimIdentity({ data: {} });
-      if (!linked) {
-        await supabase.auth.signOut();
-        toast.error("This address could not be matched to a migrated account.");
-        await navigate({ to: "/auth", replace: true });
-        return;
-      }
+      // Re-links a migrated account when it matches; never blocks the password change.
+      await claimIdentity({ data: {} }).catch(() => undefined);
+      const { data: auth } = await supabase.auth.getUser();
+      const { data: role } = auth.user
+        ? await supabase.from("user_roles").select("role").eq("user_id", auth.user.id).eq("role", "admin").maybeSingle()
+        : { data: null };
       toast.success("Password updated.");
-      await navigate({ to: "/admin", replace: true });
+      await navigate({ to: role?.role === "admin" ? "/admin" : "/", replace: true });
     } catch {
-      toast.error("Could not verify owner access. Please sign in again.");
-      await navigate({ to: "/auth", replace: true });
+      toast.error("Could not update the password. Please open the reset link again.");
     } finally {
       setBusy(false);
     }
