@@ -46,31 +46,40 @@ export function YoutubePopup() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="bg-card-grad gold-frame text-center sm:max-w-md">
-        <img src={media.logo} alt="" className="animate-float mx-auto h-24 w-24" />
-        <DialogHeader className="items-center text-center sm:text-center">
-          <DialogTitle className="font-display text-3xl text-gold">Visit our YouTube channel</DialogTitle>
-          <DialogDescription>
-            {totalVideos.toLocaleString()}+ Urdu audio novels with full text. Subscribe to{" "}
-            {channel.name} so you never miss a new episode.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:justify-center">
-          <Button asChild variant="youtube" size="lg">
+      <DialogContent className="bg-card-grad gold-frame w-[calc(100%-2rem)] max-w-sm gap-0 overflow-hidden rounded-2xl p-0 text-center sm:max-w-md sm:rounded-2xl">
+        <div className="relative px-6 pb-2 pt-8 sm:px-8">
+          <div className="bg-glow-radial pointer-events-none absolute left-1/2 top-2 h-40 w-40 -translate-x-1/2" aria-hidden />
+          <img src={media.logo} alt="" className="animate-float relative mx-auto h-20 w-20" />
+          <DialogHeader className="relative mt-4 items-center space-y-2 text-center sm:text-center">
+            <DialogTitle className="font-display text-2xl leading-tight text-gold sm:text-3xl">
+              Visit our YouTube channel
+            </DialogTitle>
+            <DialogDescription className="mx-auto max-w-xs text-sm leading-relaxed">
+              {totalVideos.toLocaleString()}+ Urdu audio novels with full text. Subscribe to{" "}
+              {channel.name} so you never miss a new episode.
+            </DialogDescription>
+          </DialogHeader>
+        </div>
+        <div className="flex flex-col gap-3 px-6 pb-6 pt-4 sm:px-8 sm:pb-7">
+          <Button asChild variant="youtube" size="lg" className="w-full">
             <a href={`${channel.url}?sub_confirmation=1`} target="_blank" rel="noreferrer">
               <Youtube /> Subscribe on YouTube
             </a>
           </Button>
           {whatsappChannel ? (
-            <Button asChild variant="whatsapp" size="lg">
+            <Button asChild variant="whatsapp" size="lg" className="w-full">
               <a href={whatsappChannel.url} target="_blank" rel="noreferrer">
                 <BrandIcon id="whatsapp" className="h-5 w-5" /> Join WhatsApp channel
               </a>
             </Button>
           ) : null}
-          <Button variant="glass" size="lg" onClick={() => setOpen(false)}>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="mx-auto mt-1 cursor-pointer rounded-md px-3 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
             Maybe later
-          </Button>
+          </button>
         </div>
       </DialogContent>
     </Dialog>
