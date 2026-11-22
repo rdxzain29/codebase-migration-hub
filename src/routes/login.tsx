@@ -45,6 +45,18 @@ function LoginPage() {
   // Already signed in (or just back from Google / Microsoft): continue where the reader was.
   useEffect(() => {
     if (redirect) sessionStorage.setItem(RETURN_KEY, redirect);
+    // An email link that was already used (or opened twice) comes back with an error in the address.
+    const linkError = new URLSearchParams(window.location.hash.slice(1)).get("error_code")
+      ?? new URLSearchParams(window.location.search).get("error_code");
+    if (linkError) {
+      toast.info(
+        linkError === "otp_expired"
+          ? "This email link was already used or has expired. If you clicked it before, your email is verified — just sign in below."
+          : "That email link didn't work. Please sign in, or request a new link.",
+        { duration: 10000 },
+      );
+      window.history.replaceState(null, "", window.location.pathname);
+    }
     const go = () => {
       const target = safeReaderReturn(sessionStorage.getItem(RETURN_KEY), window.location.origin);
       sessionStorage.removeItem(RETURN_KEY);
