@@ -26,6 +26,7 @@ function ResetPasswordPage() {
   const navigate = useNavigate();
   const claimIdentity = useServerFn(claimLegacyIdentity);
   const [ready, setReady] = useState(false);
+  const [linkFailed, setLinkFailed] = useState(false);
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -33,6 +34,8 @@ function ResetPasswordPage() {
     let active = true;
     const params = new URLSearchParams(`${window.location.search.slice(1)}&${window.location.hash.slice(1)}`);
     const linkType = params.get("type");
+    // A reset link that was already used or has expired comes back with an error in the address.
+    if (params.get("error_code") || params.get("error")) setLinkFailed(true);
     if (linkType === "recovery" || linkType === "invite" || linkType === "signup") {
       setReady(true);
     }
@@ -89,6 +92,16 @@ function ResetPasswordPage() {
               {busy ? "Saving…" : "Save password"}
             </Button>
           </form>
+        ) : linkFailed ? (
+          <div className="mt-4 space-y-4">
+            <p className="text-sm text-muted-foreground">
+              This reset link was already used or has expired. Each link works only once — request a new one and open
+              the latest email.
+            </p>
+            <Button type="button" variant="gold" className="w-full" onClick={() => void navigate({ to: "/login" })}>
+              Request a new link
+            </Button>
+          </div>
         ) : (
           <p className="mt-4 text-sm text-muted-foreground">
             Open this page from your setup or password-reset email.

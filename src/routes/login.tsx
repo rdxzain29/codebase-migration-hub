@@ -46,8 +46,10 @@ function LoginPage() {
   useEffect(() => {
     if (redirect) sessionStorage.setItem(RETURN_KEY, redirect);
     // An email link that was already used (or opened twice) comes back with an error in the address.
-    const linkError = new URLSearchParams(window.location.hash.slice(1)).get("error_code")
-      ?? new URLSearchParams(window.location.search).get("error_code");
+    const hashParams = new URLSearchParams(window.location.hash.slice(1));
+    const queryParams = new URLSearchParams(window.location.search);
+    const linkError = hashParams.get("error_code") ?? queryParams.get("error_code")
+      ?? hashParams.get("error") ?? queryParams.get("error");
     if (linkError) {
       toast.info(
         linkError === "otp_expired"
