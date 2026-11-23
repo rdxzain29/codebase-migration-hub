@@ -9,3 +9,5 @@
 - [ ] Check offline install after publishing.
 - [x] Watch Reels page: all channel YouTube Shorts in a vertical swipe feed + owner can upload videos / add Shorts links.
 - [x] Professional reader login: Google, Microsoft, email+password (Gmail / Outlook only).
+- [x] Fix Reels/page crash caused by a shared loading request between visits.
+- [ ] TeraBox episodes can't play on-site (TeraBox blocks it) — waiting on owner's choice: YouTube Unlisted or Google Drive links.

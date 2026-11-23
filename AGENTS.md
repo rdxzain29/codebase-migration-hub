@@ -43,3 +43,5 @@ Looping animations on the Nadia Nawaz page move only transform/opacity and pause
 Reader accounts use Lovable Cloud auth (Google, Microsoft, email+password); the allowed email domains live in `src/lib/login.ts` and are mirrored by the `enforce_signup_email_domain` trigger, so change both together.
 
 The Reels feed merges owner-added `reels` rows (first) with the channel's YouTube Shorts read page-by-page from the public Shorts tab in `src/lib/reels.functions.ts`; no YouTube API key is needed, and the RSS Shorts playlist is the fallback.
+
+Server-side module caches hold plain data only, never pending promises; workerd drops promises settled outside the request that created them.
