@@ -99,7 +99,7 @@ function NovelPage() {
               />
             )}
             {/* Google Drive's player has a pop-out button in this corner that leaves the site; keep viewers here. */}
-            {ep && isDriveId(ep.id) && <div aria-hidden className="absolute right-0 top-0 h-16 w-16" />}
+            {ep && isDriveId(ep.id) && <div aria-hidden className="absolute right-0 top-0 h-[68px] w-[68px] bg-ink" />}
             {ep && !isPlayableId(ep.id) && (
               <div className="relative flex h-full w-full items-center justify-center">
                 <img src={episodeThumb(ep, novel, "hq")} alt="" className="absolute inset-0 h-full w-full object-cover opacity-30" />
