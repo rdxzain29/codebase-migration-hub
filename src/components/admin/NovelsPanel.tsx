@@ -30,7 +30,7 @@ import {
   novels,
   searchNovels,
 } from "@/lib/catalog";
-import { isTeraboxId, watchUrlFor } from "@/lib/video";
+import { isTeraboxId, sourceOf, watchUrlFor } from "@/lib/video";
 
 export function NovelsPanel({ onChanged, version }: { onChanged: () => Promise<void>; version: number }) {
   const [q, setQ] = useState("");
@@ -173,8 +173,11 @@ function EditorBody({ novel, onChanged }: { novel: AdminNovel; onChanged: () => 
               <img src={episodeThumb(e, novel)} alt="" loading="lazy" className="h-12 w-20 shrink-0 rounded object-cover" />
               <div className="min-w-0 flex-1">
                 <p className="text-xs text-primary">
-                  {e.ep ? `Episode ${e.ep}` : `Part ${i + 1}`}{e.s ? ` · Season ${e.s}` : ""} · {isTeraboxId(e.id) ? "TeraBox" : "YouTube"}
+                  {e.ep ? `Episode ${e.ep}` : `Part ${i + 1}`}{e.s ? ` · Season ${e.s}` : ""} · {{ youtube: "YouTube", gdrive: "Google Drive", terabox: "TeraBox" }[sourceOf(e.id)]}
                 </p>
+                {isTeraboxId(e.id) && (
+                  <p className="text-xs text-destructive">Won't play on the site — edit it and paste a YouTube or Google Drive link.</p>
+                )}
                 <p className="line-clamp-1 text-sm">{e.t}</p>
               </div>
               <a href={watchUrlFor(e.id)} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary" aria-label="Open video"><ExternalLink className="h-4 w-4" /></a>
@@ -183,7 +186,8 @@ function EditorBody({ novel, onChanged }: { novel: AdminNovel; onChanged: () => 
                 variant="glass"
                 aria-label="Edit part"
                 onClick={() => setPart({
-                  link: row?.share_url ?? (isTeraboxId(e.id) ? watchUrlFor(e.id) : `https://youtu.be/${e.id}`),
+                  link: row?.share_url ?? (sourceOf(e.id) === "youtube" ? `https://youtu.be/${e.id}` : watchUrlFor(e.id)),
+                  replaces: e.id,
                   novelSlug: novel.slug, title: e.t, ep: e.ep != null ? String(e.ep) : "", season: e.s != null ? String(e.s) : "",
                   thumbUrl: row?.thumb_url ?? "", duration: e.d, views: e.v, published: row?.published_at ?? null,
                 })}

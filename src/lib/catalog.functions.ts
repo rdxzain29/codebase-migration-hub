@@ -54,7 +54,7 @@ export const getCatalogOverrides = createServerFn({ method: "GET" })
       ...v,
       duration_sec: Number(v.duration_sec) || 0,
       views: Number(v.views) || 0,
-      source: v.source === "terabox" ? "terabox" : "youtube",
+      source: v.source === "terabox" ? "terabox" : v.source === "gdrive" ? "gdrive" : "youtube",
     }));
     return { version, novels, videos, categories };
   });

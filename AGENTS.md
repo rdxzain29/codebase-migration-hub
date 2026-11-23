@@ -45,3 +45,5 @@ Reader accounts use Lovable Cloud auth (Google, Microsoft, email+password); the 
 The Reels feed merges owner-added `reels` rows (first) with the channel's YouTube Shorts read page-by-page from the public Shorts tab in `src/lib/reels.functions.ts`; no YouTube API key is needed, and the RSS Shorts playlist is the fallback.
 
 Server-side module caches hold plain data only, never pending promises; workerd drops promises settled outside the request that created them.
+
+Episode videos come from YouTube or Google Drive (`gd-<fileId>`, played via Drive's /preview embed) and must play inside the site; legacy `tb-` TeraBox ids are kept only so the owner can replace them, because TeraBox blocks off-site playback.

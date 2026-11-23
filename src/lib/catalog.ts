@@ -1,6 +1,6 @@
 import raw from "@/data/catalog.json";
 import { media } from "@/lib/media";
-import { isTeraboxId } from "@/lib/video";
+import { driveFileId, driveThumbUrl, isDriveId } from "@/lib/video";
 
 export type Episode = {
   id: string;
@@ -9,7 +9,7 @@ export type Episode = {
   s: number | null;
   d: number;
   v: number;
-  /** Cover picture for non-YouTube parts (TeraBox). */
+  /** Cover picture for non-YouTube parts (Google Drive, old TeraBox). */
   img?: string | null;
 };
 
@@ -76,7 +76,7 @@ export type CatalogVideoRow = {
   hidden: boolean;
   published_at: string | null;
   created_at?: string;
-  source?: "youtube" | "terabox";
+  source?: "youtube" | "gdrive" | "terabox";
   share_url?: string | null;
   thumb_url?: string | null;
 };
@@ -186,7 +186,9 @@ export function buildCatalog(o: CatalogOverrides): CatalogView {
         s: v.season,
         d: v.duration_sec || owner?.ep.d || 0,
         v: v.views || owner?.ep.v || 0,
-        ...(v.source === "terabox" ? { img: v.thumb_url ?? null } : {}),
+        ...(v.source === "terabox" || v.source === "gdrive" || isDriveId(v.video_id)
+          ? { img: v.thumb_url ?? (isDriveId(v.video_id) ? driveThumbUrl(driveFileId(v.video_id)) : null) }
+          : {}),
       },
     ];
     touched.add(v.novel_slug);
@@ -341,16 +343,18 @@ export function suggestFromTitle(title: string, list: Novel[] = byViews) {
 export const thumb = (videoId: string, quality: "hq" | "mq" | "maxres" = "hq") =>
   `https://i.ytimg.com/vi/${videoId}/${quality}default.jpg`;
 
-/** Novel cover: first YouTube part's thumbnail, else a TeraBox cover, else the library artwork. */
+const isYoutubeEp = (id: string) => /^[A-Za-z0-9_-]{11}$/.test(id);
+
+/** Novel cover: first YouTube part's thumbnail, else a Drive/saved cover, else the library artwork. */
 export function coverOf(n: Novel): string {
-  const yt = n.eps.find((e) => !isTeraboxId(e.id));
+  const yt = n.eps.find((e) => isYoutubeEp(e.id));
   if (yt) return thumb(yt.id, "hq");
   return n.eps.find((e) => e.img)?.img ?? media.hero;
 }
 
 /** Thumbnail for one part of a novel. */
 export function episodeThumb(e: Episode, n: Novel, quality: "hq" | "mq" = "mq"): string {
-  if (!isTeraboxId(e.id)) return thumb(e.id, quality);
+  if (isYoutubeEp(e.id)) return thumb(e.id, quality);
   return e.img ?? coverOf(n);
 }
 

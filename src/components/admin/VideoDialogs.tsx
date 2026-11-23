@@ -11,12 +11,13 @@ import {
   isNovelSlugTaken,
   nextEpisodeNumber,
   saveNovel,
+  retireReplacedVideo,
   saveVideo,
   uniqueSlug,
 } from "@/lib/admin-catalog";
 import { getCatalogOverridesSnapshot, isKnownVideo, novels } from "@/lib/catalog";
-import { lookupTerabox, lookupVideo } from "@/lib/youtube.functions";
-import { embedUrlFor, parseVideoLink, titleFromFileName } from "@/lib/video";
+import { lookupDrive, lookupVideo } from "@/lib/youtube.functions";
+import { embedUrlFor, isTeraboxLink, parseVideoLink, titleFromFileName, type VideoSource } from "@/lib/video";
 import { cn } from "@/lib/utils";
 
 export type VideoDraft = {
@@ -29,6 +30,8 @@ export type VideoDraft = {
   duration: number;
   views: number;
   published: string | null;
+  /** Id of the part being edited, so a changed link replaces it instead of adding a copy. */
+  replaces?: string;
 };
 
 const emptyDraft = (p: Partial<VideoDraft> = {}): VideoDraft => ({
@@ -37,15 +40,17 @@ const emptyDraft = (p: Partial<VideoDraft> = {}): VideoDraft => ({
 
 const toNum = (v: string) => (v.trim() === "" ? null : Number.isFinite(Number(v)) ? Math.round(Number(v)) : null);
 
-/** Reads a pasted YouTube or TeraBox link and fills title, length and views when possible. */
+const TERABOX_GONE = "TeraBox videos can't play on the site. Please use a YouTube or Google Drive link.";
+
+/** Reads a pasted YouTube or Google Drive link and fills title, length and views when possible. */
 function useLookup() {
   const ytLookup = useServerFn(lookupVideo);
-  const tbLookup = useServerFn(lookupTerabox);
+  const driveLookup = useServerFn(lookupDrive);
   const [busy, setBusy] = useState(false);
   const run = async (link: string): Promise<Partial<VideoDraft> | null> => {
     const parsed = parseVideoLink(link);
     if (!parsed) {
-      toast.error("This is not a YouTube or TeraBox video link.");
+      toast.error(isTeraboxLink(link) ? TERABOX_GONE : "This is not a YouTube or Google Drive video link.");
       return null;
     }
     setBusy(true);
@@ -55,8 +60,12 @@ function useLookup() {
         if (!d?.title) toast.message("Could not read the title from YouTube — please type it.");
         return { title: d?.title ?? "", duration: d?.duration ?? 0, views: d?.views ?? 0, published: d?.published ?? null };
       }
-      const d = await tbLookup({ data: { surl: parsed.surl } });
-      if (!d.found) toast.message("TeraBox did not share the file name — please type the title.");
+      const d = await driveLookup({ data: { fileId: parsed.fileId } });
+      if (d.shared === false) {
+        toast.error("Google Drive could not open this video. Check the link, and in Drive set sharing to “Anyone with the link”.");
+        return null;
+      }
+      if (!d.title) toast.message("Could not read the file name from Google Drive — please type the title.");
       return { title: d.title ? titleFromFileName(d.title) : "" };
     } catch {
       toast.error("Could not read the video details. You can still type them.");
@@ -68,11 +77,13 @@ function useLookup() {
   return { run, busy };
 }
 
-type VideoSource = "youtube" | "terabox";
-
 const SOURCE_INFO: Record<VideoSource, { label: string; placeholder: string; hint: string }> = {
   youtube: { label: "YouTube", placeholder: "https://youtu.be/… or https://www.youtube.com/watch?v=…", hint: "Paste the YouTube video link." },
-  terabox: { label: "TeraBox", placeholder: "https://1024terabox.com/s/… or https://terabox.com/s/…", hint: "Paste the TeraBox share link of one video file." },
+  gdrive: {
+    label: "Google Drive",
+    placeholder: "https://drive.google.com/file/d/…/view",
+    hint: "Paste the Drive link of one video file. Its sharing must be “Anyone with the link”.",
+  },
 };
 
 function LinkField({ draft, set, lookup }: { draft: VideoDraft; set: (p: Partial<VideoDraft>) => void; lookup: ReturnType<typeof useLookup> }) {
@@ -119,9 +130,9 @@ function LinkField({ draft, set, lookup }: { draft: VideoDraft; set: (p: Partial
         label={`${info.label} link`}
         hint={
           parsed
-            ? `${parsed.source === "youtube" ? "YouTube" : "TeraBox"} video detected — it will play on the novel page${isKnownVideo(parsed.id) ? " · already on the site (saving moves/updates it)" : ""}`
+            ? `${SOURCE_INFO[parsed.source].label} video detected — it will play on the novel page${isKnownVideo(parsed.id) ? " · already on the site (saving moves/updates it)" : ""}`
             : wrongSource
-              ? `This is not a ${info.label} video link.`
+              ? isTeraboxLink(draft.link) ? TERABOX_GONE : `This is not a ${info.label} video link.`
               : info.hint
         }
       >
@@ -157,7 +168,7 @@ function LinkField({ draft, set, lookup }: { draft: VideoDraft; set: (p: Partial
 }
 
 function PartFields({ draft, set }: { draft: VideoDraft; set: (p: Partial<VideoDraft>) => void }) {
-  const isTb = parseVideoLink(draft.link)?.source === "terabox";
+  const isDrive = parseVideoLink(draft.link)?.source === "gdrive";
   return (
     <>
       <Field label="Part title">
@@ -171,8 +182,8 @@ function PartFields({ draft, set }: { draft: VideoDraft; set: (p: Partial<VideoD
           <Input type="number" min={0} max={100} value={draft.season} onChange={(e) => set({ season: e.target.value })} aria-label="Season" />
         </Field>
       </div>
-      {isTb && (
-        <Field label="Cover picture link (optional)" hint="TeraBox has no lasting thumbnails; leave empty to use the novel's cover.">
+      {isDrive && (
+        <Field label="Cover picture link (optional)" hint="Leave empty to use the video's own picture from Google Drive.">
           <Input value={draft.thumbUrl} onChange={(e) => set({ thumbUrl: e.target.value })} placeholder="https://…" aria-label="Cover picture link" />
         </Field>
       )}
@@ -182,7 +193,7 @@ function PartFields({ draft, set }: { draft: VideoDraft; set: (p: Partial<VideoD
 
 async function persistPart(draft: VideoDraft, novelSlug: string) {
   const parsed = parseVideoLink(draft.link);
-  if (!parsed) throw new Error("Add a valid YouTube or TeraBox link.");
+  if (!parsed) throw new Error(isTeraboxLink(draft.link) ? TERABOX_GONE : "Add a valid YouTube or Google Drive link.");
   if (!draft.title.trim()) throw new Error("Please add a title for this part.");
   if (draft.thumbUrl.trim() && !/^https:\/\//.test(draft.thumbUrl.trim())) throw new Error("The cover picture link must start with https://");
   const existing = getCatalogOverridesSnapshot().videos.find((v) => v.video_id === parsed.id);
@@ -194,12 +205,13 @@ async function persistPart(draft: VideoDraft, novelSlug: string) {
     season: toNum(draft.season),
     source: parsed.source,
     share_url: parsed.shareUrl,
-    thumb_url: parsed.source === "terabox" ? draft.thumbUrl || null : null,
+    thumb_url: parsed.source === "gdrive" ? draft.thumbUrl || null : null,
     duration_sec: draft.duration || existing?.duration_sec || 0,
     views: draft.views || existing?.views || 0,
     published_at: draft.published ?? existing?.published_at ?? new Date().toISOString(),
     hidden: false,
   });
+  if (draft.replaces) await retireReplacedVideo(draft.replaces, parsed.id, novelSlug);
 }
 
 /* ------------------------------ Add a part ------------------------------ */
@@ -247,7 +259,7 @@ export function AddPartDialog({
       <DialogContent className="bg-card-grad gold-frame max-h-[90vh] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className="font-display text-3xl">{title}</DialogTitle>
-          <DialogDescription>Add a YouTube or TeraBox video as a new episode of an existing novel.</DialogDescription>
+          <DialogDescription>Add a YouTube or Google Drive video as a new episode of an existing novel.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <LinkField draft={draft} set={set} lookup={lookup} />
@@ -311,7 +323,7 @@ export function NewSeriesDialog({
   const save = async () => {
     if (!series.name.trim()) { toast.error("Please write the novel name."); return; }
     if (series.cats.length === 0) { toast.error("Choose at least one category."); return; }
-    if (!parseVideoLink(video.link)) { toast.error("Add the first episode's YouTube or TeraBox link."); return; }
+    if (!parseVideoLink(video.link)) { toast.error(isTeraboxLink(video.link) ? TERABOX_GONE : "Add the first episode's YouTube or Google Drive link."); return; }
     const playlist = /[?&]list=([A-Za-z0-9_-]{10,64})/.exec(series.playlist)?.[1] ?? (/^[A-Za-z0-9_-]{10,64}$/.test(series.playlist.trim()) ? series.playlist.trim() : null);
     if (series.playlist.trim() && !playlist) { toast.error("The playlist link is not a YouTube playlist."); return; }
     setBusy(true);

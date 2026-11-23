@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { BookOpen, Download, ExternalLink, Eye, FileSearch, MessageSquareReply, Youtube } from "lucide-react";
+import { BookOpen, Clock, Download, Eye, FileSearch, MessageSquareReply, Youtube } from "lucide-react";
 import { toast } from "sonner";
 import { Stars } from "@/components/site/Stars";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   coverOf, episodeThumb, findPdfLink, formatDuration, formatViews, getCategory, getNovel, youtubePlaylistLink,
 } from "@/lib/catalog";
-import { embedUrlFor, isTeraboxId, watchUrlFor } from "@/lib/video";
+import { embedUrlFor, isDriveId, isPlayableId, sourceOf, watchUrlFor } from "@/lib/video";
 import { addReview, bumpStat, pdfQuery, pdfUrl, ratingQuery, reviewsQuery, statsQuery } from "@/lib/community";
 import { openLogin, useReaderName } from "@/lib/reader";
 import { cn } from "@/lib/utils";
@@ -86,8 +86,8 @@ function NovelPage() {
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <div>
-          <div className="gold-frame aspect-video overflow-hidden rounded-xl bg-ink">
-            {ep && (
+          <div className="gold-frame relative aspect-video overflow-hidden rounded-xl bg-ink">
+            {ep && isPlayableId(ep.id) && (
               <iframe
                 key={ep.id}
                 src={embedUrlFor(ep.id)}
@@ -97,6 +97,18 @@ function NovelPage() {
                 allowFullScreen
                 className="h-full w-full"
               />
+            )}
+            {/* Google Drive's player has a pop-out button in this corner that leaves the site; keep viewers here. */}
+            {ep && isDriveId(ep.id) && <div aria-hidden className="absolute right-0 top-0 h-16 w-16" />}
+            {ep && !isPlayableId(ep.id) && (
+              <div className="relative flex h-full w-full items-center justify-center">
+                <img src={episodeThumb(ep, novel, "hq")} alt="" className="absolute inset-0 h-full w-full object-cover opacity-30" />
+                <div className="relative mx-6 max-w-md rounded-xl border border-border bg-card/90 p-6 text-center">
+                  <Clock className="mx-auto h-8 w-8 text-primary" />
+                  <p className="mt-3 font-display text-2xl">This episode is coming back soon</p>
+                  <p className="mt-2 text-sm text-muted-foreground">It is moving to our new player. Please check again in a little while.</p>
+                </div>
+              </div>
             )}
           </div>
           <div className="mt-6">
@@ -124,11 +136,7 @@ function NovelPage() {
               <span className="flex items-center gap-2"><Stars value={rating?.avg ?? 0} /> {rating?.count ? `${rating.avg.toFixed(1)} (${rating.count})` : "No ratings yet"}</span>
             </div>
             <div className="mt-6 flex flex-wrap gap-2">
-              {ep && isTeraboxId(ep.id) ? (
-                <Button asChild variant="glass">
-                  <a href={watchUrlFor(ep.id)} target="_blank" rel="noreferrer"><ExternalLink /> Open on TeraBox</a>
-                </Button>
-              ) : ep ? (
+              {ep && sourceOf(ep.id) === "youtube" ? (
                 <Button asChild variant="youtube">
                   <a href={novel.playlist ? youtubePlaylistLink(novel.playlist) : watchUrlFor(ep.id)} target="_blank" rel="noreferrer"><Youtube /> Watch on YouTube</a>
                 </Button>

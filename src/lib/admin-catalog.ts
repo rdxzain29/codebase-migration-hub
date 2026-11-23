@@ -10,6 +10,7 @@ import {
   type Novel,
 } from "@/lib/catalog";
 import { loadCatalog } from "@/lib/catalog-live";
+import { sourceOf } from "@/lib/video";
 
 /* ---------------------------- pure helpers ---------------------------- */
 
@@ -114,7 +115,7 @@ export type VideoInput = {
   title: string;
   ep: number | null;
   season: number | null;
-  source: "youtube" | "terabox";
+  source: "youtube" | "gdrive" | "terabox";
   share_url: string | null;
   thumb_url?: string | null;
   duration_sec?: number;
@@ -151,7 +152,7 @@ export async function hideVideo(row: CatalogVideoRow | undefined, videoId: strin
     title: row?.title ?? base?.ep.t ?? videoId,
     ep: row?.ep ?? base?.ep.ep ?? null,
     season: row?.season ?? base?.ep.s ?? null,
-    source: row?.source ?? (videoId.startsWith("tb-") ? "terabox" : "youtube"),
+    source: row?.source ?? sourceOf(videoId),
     share_url: row?.share_url ?? null,
     thumb_url: row?.thumb_url ?? null,
     duration_sec: row?.duration_sec ?? base?.ep.d ?? 0,
@@ -159,6 +160,17 @@ export async function hideVideo(row: CatalogVideoRow | undefined, videoId: strin
     published_at: row?.published_at ?? null,
     hidden: true,
   });
+}
+
+/**
+ * After a part's link was changed to a different video, take the old one off the site:
+ * an original library part is hidden, an owner-added part is removed.
+ */
+export async function retireReplacedVideo(oldId: string, newId: string, novelSlug: string) {
+  if (!oldId || oldId === newId) return;
+  const row = getCatalogOverridesSnapshot().videos.find((v) => v.video_id === oldId);
+  if (getBaseVideo(oldId)) await hideVideo(row, oldId, novelSlug);
+  else await resetVideo(oldId);
 }
 
 /** Forget the owner's change to a part (an owner-added part disappears; an original part returns). */
